@@ -44,6 +44,26 @@ async function loadAllData() {
         const response = await fetch('api.php?action=get_all');
         allData = await response.json();
         
+        // Inicializar categorías si no existen
+        if (!allData.categorias_gastos || allData.categorias_gastos.length === 0) {
+            allData.categorias_gastos = ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'];
+        }
+        
+        // Asegurar que las categorías sean un array válido
+        if (!Array.isArray(allData.categorias_gastos)) {
+            allData.categorias_gastos = ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'];
+        }
+        
+        // Inicializar tipos de ingresos si no existen
+        if (!allData.tipos_ingresos || allData.tipos_ingresos.length === 0) {
+            allData.tipos_ingresos = ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS'];
+        }
+        
+        // Asegurar que los tipos de ingresos sean un array válido
+        if (!Array.isArray(allData.tipos_ingresos)) {
+            allData.tipos_ingresos = ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS'];
+        }
+        
         // Migrar formato antiguo de deudas (enero -> montos_mensuales)
         if (allData.deudas) {
             allData.deudas.forEach(deuda => {
@@ -61,6 +81,24 @@ async function loadAllData() {
             allData.planificacion_mensual = {
                 enero: allData.montos_enero
             };
+        }
+        
+        // Migrar tipos de ingresos: convertir "1" a "SUELDO" en memoria
+        if (allData.entradas) {
+            allData.entradas.forEach(entrada => {
+                if (entrada.tipo === '1') {
+                    entrada.tipo = 'SUELDO';
+                }
+            });
+        }
+        
+        // Limpiar tipos de ingresos inválidos (números)
+        if (allData.tipos_ingresos) {
+            allData.tipos_ingresos = allData.tipos_ingresos.filter(tipo => !tipo.match(/^\d+$/));
+            if (!allData.tipos_ingresos.includes('SUELDO')) {
+                allData.tipos_ingresos.push('SUELDO');
+                allData.tipos_ingresos.sort();
+            }
         }
         
         renderAll();
@@ -92,8 +130,44 @@ let chartMetas = null;
 // Actualizar resumen
 function updateSummary() {
     const totalIngresos = allData.entradas.reduce((sum, e) => sum + parseFloat(e.sueldo || 0), 0);
-    const totalGastos = allData.salidas.reduce((sum, s) => sum + parseFloat(s.monto || 0), 0);
-    const totalDeudas = allData.deudas.reduce((sum, d) => sum + parseFloat(d.monto || 0), 0);
+    
+    // Separar gastos recurrentes (comunes) de otros gastos
+    const gastosRecurrentes = allData.salidas
+        .filter(s => s.tipo === 'comun')
+        .reduce((sum, s) => sum + parseFloat(s.monto || 0), 0);
+    
+    const otrosGastos = allData.salidas
+        .filter(s => s.tipo === 'otro' || !s.tipo)
+        .reduce((sum, s) => sum + parseFloat(s.monto || 0), 0);
+    
+    const totalGastos = gastosRecurrentes + otrosGastos;
+    
+    // Calcular total de deudas usando el RESTANTE (monto total - total pagado)
+    // Estas son deudas no fijas que pueden pagarse en varios meses
+    let totalDeudas = 0;
+    allData.deudas.forEach(deuda => {
+        const montoTotal = parseFloat(deuda.monto || 0);
+        
+        // Calcular total pagado en todos los meses
+        let totalPagadoTodosMeses = 0;
+        if (deuda.montos_pagados) {
+            Object.values(deuda.montos_pagados).forEach(monto => {
+                totalPagadoTodosMeses += parseFloat(monto || 0);
+            });
+        } else if (deuda.montos_mensuales) {
+            // Migración temporal
+            Object.values(deuda.montos_mensuales).forEach(monto => {
+                totalPagadoTodosMeses += parseFloat(monto || 0);
+            });
+        } else if (deuda.enero) {
+            totalPagadoTodosMeses = parseFloat(deuda.enero || 0);
+        }
+        
+        // El restante es lo que queda por pagar
+        const restante = montoTotal - totalPagadoTodosMeses;
+        totalDeudas += restante > 0 ? restante : 0; // Solo sumar si es positivo
+    });
+    
     // Calcular ahorros acumulados de todos los meses
     let totalAhorros = 0;
     if (allData.planificacion_mensual) {
@@ -103,15 +177,20 @@ function updateSummary() {
             });
         });
     }
-    const balance = totalIngresos - totalGastos - totalDeudas;
+    
+    // Balance disponible = Ingresos - Gastos Recurrentes - Otros Gastos - Deudas
+    // Los gastos recurrentes son obligatorios mensuales, las deudas son flexibles en tiempo
+    const balance = totalIngresos - gastosRecurrentes - otrosGastos - totalDeudas;
     
     // Calcular progreso de metas
     const totalMeta = allData.metas.reduce((sum, m) => sum + parseFloat(m.monto_meta || 0), 0);
     const totalActual = allData.metas.reduce((sum, m) => sum + parseFloat(m.monto_actual || 0), 0);
     const progresoPorcentaje = totalMeta > 0 ? ((totalActual / totalMeta) * 100).toFixed(1) : 0;
     
+    // Actualizar elementos del DOM
     document.getElementById('total-ingresos').textContent = formatCurrency(totalIngresos);
-    document.getElementById('total-gastos').textContent = formatCurrency(totalGastos);
+    document.getElementById('gastos-recurrentes').textContent = formatCurrency(gastosRecurrentes);
+    document.getElementById('otros-gastos').textContent = formatCurrency(otrosGastos);
     document.getElementById('total-deudas').textContent = formatCurrency(totalDeudas);
     document.getElementById('balance-disponible').textContent = formatCurrency(balance);
     document.getElementById('total-ahorros').textContent = formatCurrency(totalAhorros);
@@ -292,11 +371,62 @@ function renderEntradas() {
     const tbody = document.getElementById('tbody-entradas');
     tbody.innerHTML = '';
     
+    // Ordenar ingresos por fecha (más recientes primero)
+    const entradasOrdenadas = [...allData.entradas].sort((a, b) => {
+        const fechaA = a.fecha ? new Date(a.fecha) : new Date(0);
+        const fechaB = b.fecha ? new Date(b.fecha) : new Date(0);
+        return fechaB - fechaA; // Orden descendente
+    });
+    
     let total = 0;
-    allData.entradas.forEach(entrada => {
+    entradasOrdenadas.forEach(entrada => {
         total += parseFloat(entrada.sueldo || 0);
+        
+        // Formatear fecha (evitar problemas de zona horaria)
+        let fechaFormateada = '-';
+        if (entrada.fecha) {
+            // Si la fecha viene en formato YYYY-MM-DD, convertirla correctamente sin problemas de zona horaria
+            const fechaStr = entrada.fecha.split('T')[0]; // Asegurar solo la parte de fecha
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) {
+                // Crear fecha en hora local explícitamente (año, mes-1, día)
+                const fecha = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } else {
+                // Fallback al método anterior si el formato es diferente
+                const fecha = new Date(entrada.fecha);
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        }
+        
+        // Obtener el nombre del tipo, convertir "1" a "SUELDO" si es necesario
+        let tipoDisplay = entrada.tipo || 'SUELDO';
+        
+        // Migración: convertir "1" a "SUELDO" (corregir datos antiguos)
+        if (tipoDisplay === '1') {
+            tipoDisplay = 'SUELDO';
+            // Actualizar el dato en memoria para que se guarde correctamente
+            entrada.tipo = 'SUELDO';
+        }
+        
+        // Si el tipo no está en la lista de tipos válidos, usar SUELDO por defecto
+        if (tipoDisplay && tipoDisplay.match(/^\d+$/)) {
+            tipoDisplay = 'SUELDO';
+            entrada.tipo = 'SUELDO';
+        }
+        
         const row = `
             <tr>
+                <td>${fechaFormateada}</td>
+                <td>${tipoDisplay}</td>
                 <td>${formatCurrency(entrada.sueldo)}</td>
                 <td>${entrada.quien}</td>
                 <td>
@@ -311,22 +441,170 @@ function renderEntradas() {
     document.getElementById('entrada-total').textContent = formatCurrency(total);
 }
 
+function cargarTiposIngresos() {
+    const select = document.getElementById('entrada-tipo');
+    if (!select) {
+        console.error('Select entrada-tipo no encontrado');
+        return;
+    }
+    
+    // Verificar que allData existe
+    if (!allData) {
+        console.warn('allData no está disponible aún, usando tipos por defecto');
+    }
+    
+    // Obtener tipos de allData o usar los por defecto
+    const tipos = allData && allData.tipos_ingresos && Array.isArray(allData.tipos_ingresos) && allData.tipos_ingresos.length > 0 
+        ? allData.tipos_ingresos 
+        : ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS'];
+    
+    console.log('Cargando tipos de ingresos:', tipos);
+    
+    // Limpiar todas las opciones existentes
+    select.innerHTML = '';
+    
+    // Agregar opción por defecto
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Seleccione un tipo';
+    select.appendChild(defaultOption);
+    
+    // Ordenar tipos alfabéticamente (excepto OTROS que va al final)
+    const tiposOrdenados = [...tipos].sort((a, b) => {
+        if (a === 'OTROS' || a === 'OTRO') return 1;
+        if (b === 'OTROS' || b === 'OTRO') return -1;
+        return a.localeCompare(b);
+    });
+    
+    // Agregar tipos al select
+    tiposOrdenados.forEach(tipo => {
+        if (tipo && tipo.trim()) {
+            const option = document.createElement('option');
+            option.value = tipo;
+            option.textContent = tipo;
+            select.appendChild(option);
+        }
+    });
+    
+    // Agregar opción "OTROS" al final si no existe
+    if (!tipos.includes('OTROS') && !tipos.includes('OTRO')) {
+        const option = document.createElement('option');
+        option.value = 'OTROS';
+        option.textContent = 'OTROS';
+        select.appendChild(option);
+    }
+    
+    console.log('Tipos de ingresos cargados en el select. Total de opciones:', select.options.length);
+}
+
+function mostrarAgregarTipoIngreso() {
+    const container = document.getElementById('nuevo-tipo-ingreso-container');
+    const input = document.getElementById('nuevo-tipo-ingreso-input');
+    container.style.display = 'block';
+    input.value = '';
+    input.focus();
+}
+
+function agregarTipoIngreso() {
+    const input = document.getElementById('nuevo-tipo-ingreso-input');
+    const nuevoTipo = input.value.trim().toUpperCase();
+    
+    if (!nuevoTipo) {
+        alert('Por favor ingrese un tipo de ingreso');
+        return;
+    }
+    
+    // Agregar al select
+    const select = document.getElementById('entrada-tipo');
+    const option = document.createElement('option');
+    option.value = nuevoTipo;
+    option.textContent = nuevoTipo;
+    select.appendChild(option);
+    select.value = nuevoTipo;
+    
+    // Ocultar el input
+    document.getElementById('nuevo-tipo-ingreso-container').style.display = 'none';
+    input.value = '';
+}
+
+function cancelarAgregarTipoIngreso() {
+    document.getElementById('nuevo-tipo-ingreso-container').style.display = 'none';
+    document.getElementById('nuevo-tipo-ingreso-input').value = '';
+}
+
 function openEntradaModal(entrada = null) {
     const modal = document.getElementById('modal-entrada');
     const form = document.getElementById('form-entrada');
     const title = document.getElementById('modal-entrada-title');
+    
+    if (!modal) {
+        console.error('Modal entrada no encontrado');
+        return;
+    }
+    
+    // Establecer fecha por defecto a hoy
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    // Mostrar modal primero para que el DOM esté disponible
+    modal.style.display = 'block';
+    
+    // Cargar tipos de ingresos
+    cargarTiposIngresos();
+    
+    // Ocultar campo de nuevo tipo
+    const nuevoTipoContainer = document.getElementById('nuevo-tipo-ingreso-container');
+    if (nuevoTipoContainer) {
+        nuevoTipoContainer.style.display = 'none';
+    }
     
     if (entrada) {
         title.textContent = 'Editar Ingreso';
         document.getElementById('entrada-id').value = entrada.id;
         document.getElementById('entrada-sueldo').value = entrada.sueldo;
         document.getElementById('entrada-quien').value = entrada.quien;
+        
+        // Establecer fecha y tipo
+        const fechaInput = document.getElementById('entrada-fecha');
+        if (fechaInput) {
+            fechaInput.value = entrada.fecha ? entrada.fecha.split('T')[0] : hoy;
+        }
+        
+        const tipoSelect = document.getElementById('entrada-tipo');
+        let tipo = entrada.tipo || 'SUELDO';
+        
+        // Si el tipo es un número (como "1"), convertirlo a SUELDO
+        if (tipo && tipo.match(/^\d+$/)) {
+            tipo = 'SUELDO';
+        }
+        
+        if (tipoSelect) {
+            // Esperar un momento para que las opciones se carguen
+            setTimeout(() => {
+                if (tipoSelect.querySelector(`option[value="${tipo}"]`)) {
+                    tipoSelect.value = tipo;
+                } else if (tipo) {
+                    // Agregar el tipo si no existe
+                    const option = document.createElement('option');
+                    option.value = tipo;
+                    option.textContent = tipo;
+                    tipoSelect.appendChild(option);
+                    tipoSelect.value = tipo;
+                }
+            }, 100);
+        }
     } else {
         title.textContent = 'Agregar Ingreso';
-        form.reset();
+        if (form) form.reset();
         document.getElementById('entrada-id').value = '';
+        const fechaInput = document.getElementById('entrada-fecha');
+        if (fechaInput) {
+            fechaInput.value = hoy;
+        }
+        const tipoSelect = document.getElementById('entrada-tipo');
+        if (tipoSelect) {
+            tipoSelect.value = '';
+        }
     }
-    modal.style.display = 'block';
 }
 
 async function handleEntradaSubmit(e) {
@@ -334,24 +612,52 @@ async function handleEntradaSubmit(e) {
     const id = document.getElementById('entrada-id').value;
     const entrada = {
         sueldo: document.getElementById('entrada-sueldo').value,
-        quien: document.getElementById('entrada-quien').value
+        quien: document.getElementById('entrada-quien').value,
+        tipo: document.getElementById('entrada-tipo').value,
+        fecha: document.getElementById('entrada-fecha').value
     };
     
+    if (!entrada.tipo) {
+        alert('Por favor seleccione o agregue un tipo de ingreso');
+        return;
+    }
+    
     try {
+        let response;
         if (id) {
             entrada.id = parseInt(id);
-            await fetch('api.php?action=update_entrada', {
+            response = await fetch('api.php?action=update_entrada', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(entrada)
             });
         } else {
-            await fetch('api.php?action=add_entrada', {
+            response = await fetch('api.php?action=add_entrada', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(entrada)
             });
         }
+        
+        const result = await response.json();
+        
+        // Actualizar tipos si vienen en la respuesta
+        if (result.tipos) {
+            allData.tipos_ingresos = result.tipos;
+        }
+        
+        // Limpiar formulario completamente
+        const form = document.getElementById('form-entrada');
+        form.reset();
+        document.getElementById('entrada-id').value = '';
+        document.getElementById('nuevo-tipo-ingreso-container').style.display = 'none';
+        document.getElementById('nuevo-tipo-ingreso-input').value = '';
+        
+        // Establecer valores por defecto
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('entrada-fecha').value = hoy;
+        document.getElementById('entrada-tipo').value = '';
+        
         closeModal('modal-entrada');
         loadAllData();
     } catch (error) {
@@ -398,15 +704,29 @@ function renderSalidas() {
         const tipo = salida.tipo || 'otro';
         const monto = parseFloat(salida.monto || 0);
         
-        // Formatear fecha
+        // Formatear fecha (evitar problemas de zona horaria)
         let fechaFormateada = '-';
         if (salida.fecha) {
-            const fecha = new Date(salida.fecha);
-            fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+            // Si la fecha viene en formato YYYY-MM-DD, convertirla correctamente sin problemas de zona horaria
+            const fechaStr = salida.fecha.split('T')[0]; // Asegurar solo la parte de fecha
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) {
+                // Crear fecha en hora local explícitamente (año, mes-1, día)
+                const fecha = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } else {
+                // Fallback al método anterior si el formato es diferente
+                const fecha = new Date(salida.fecha);
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
         }
         
         // Observación truncada si es muy larga
@@ -442,10 +762,110 @@ function renderSalidas() {
     document.getElementById('salida-total-otros').textContent = formatCurrency(totalOtros);
 }
 
+function cargarCategoriasGastos() {
+    const select = document.getElementById('salida-descripcion');
+    if (!select) {
+        console.error('Select salida-descripcion no encontrado');
+        return;
+    }
+    
+    // Verificar que allData existe
+    if (!allData) {
+        console.warn('allData no está disponible aún, usando categorías por defecto');
+    }
+    
+    // Obtener categorías de allData o usar las por defecto
+    const categorias = allData && allData.categorias_gastos && Array.isArray(allData.categorias_gastos) && allData.categorias_gastos.length > 0 
+        ? allData.categorias_gastos 
+        : ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'];
+    
+    console.log('Cargando categorías:', categorias);
+    
+    // Limpiar todas las opciones existentes
+    select.innerHTML = '';
+    
+    // Agregar opción por defecto
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Seleccione una categoría';
+    select.appendChild(defaultOption);
+    
+    // Ordenar categorías alfabéticamente (excepto OTROS que va al final)
+    const categoriasOrdenadas = [...categorias].sort((a, b) => {
+        if (a === 'OTROS' || a === 'OTRO') return 1;
+        if (b === 'OTROS' || b === 'OTRO') return -1;
+        return a.localeCompare(b);
+    });
+    
+    // Agregar categorías al select
+    categoriasOrdenadas.forEach(categoria => {
+        if (categoria && categoria.trim()) {
+            const option = document.createElement('option');
+            option.value = categoria;
+            option.textContent = categoria;
+            select.appendChild(option);
+        }
+    });
+    
+    // Agregar opción "OTRO" al final si no existe en la lista
+    if (!categorias.includes('OTRO') && !categorias.includes('OTROS')) {
+        const option = document.createElement('option');
+        option.value = 'OTRO';
+        option.textContent = 'OTRO';
+        select.appendChild(option);
+    }
+    
+    console.log('Categorías cargadas en el select. Total de opciones:', select.options.length);
+}
+
+function mostrarAgregarCategoria() {
+    const container = document.getElementById('nueva-categoria-container');
+    const input = document.getElementById('nueva-categoria-input');
+    container.style.display = 'block';
+    input.value = '';
+    input.focus();
+    cancelarAgregarCategoria = function() {
+        container.style.display = 'none';
+        input.value = '';
+    };
+}
+
+function agregarCategoria() {
+    const input = document.getElementById('nueva-categoria-input');
+    const nuevaCategoria = input.value.trim().toUpperCase();
+    
+    if (!nuevaCategoria) {
+        alert('Por favor ingrese una categoría');
+        return;
+    }
+    
+    // Agregar al select
+    const select = document.getElementById('salida-descripcion');
+    const option = document.createElement('option');
+    option.value = nuevaCategoria;
+    option.textContent = nuevaCategoria;
+    select.appendChild(option);
+    select.value = nuevaCategoria;
+    
+    // Ocultar el input
+    document.getElementById('nueva-categoria-container').style.display = 'none';
+    input.value = '';
+}
+
+function cancelarAgregarCategoria() {
+    document.getElementById('nueva-categoria-container').style.display = 'none';
+    document.getElementById('nueva-categoria-input').value = '';
+}
+
 function openSalidaModal(salida = null) {
     const modal = document.getElementById('modal-salida');
     const form = document.getElementById('form-salida');
     const title = document.getElementById('modal-salida-title');
+    
+    if (!modal) {
+        console.error('Modal salida no encontrado');
+        return;
+    }
     
     // Establecer fecha por defecto a hoy
     const hoy = new Date().toISOString().split('T')[0];
@@ -453,20 +873,53 @@ function openSalidaModal(salida = null) {
     if (salida) {
         title.textContent = 'Editar Gasto';
         document.getElementById('salida-id').value = salida.id;
-        document.getElementById('salida-descripcion').value = salida.descripcion;
         document.getElementById('salida-monto').value = salida.monto;
         document.getElementById('salida-tipo').value = salida.tipo || 'otro';
         document.getElementById('salida-fecha').value = salida.fecha ? salida.fecha.split('T')[0] : hoy;
         document.getElementById('salida-observacion').value = salida.observacion || '';
     } else {
         title.textContent = 'Agregar Gasto';
-        form.reset();
+        if (form) form.reset();
         document.getElementById('salida-id').value = '';
         document.getElementById('salida-tipo').value = 'otro';
         document.getElementById('salida-fecha').value = hoy;
         document.getElementById('salida-observacion').value = '';
     }
+    
+    // Mostrar modal primero para que el DOM esté disponible
     modal.style.display = 'block';
+    
+    // Ocultar campo de nueva categoría
+    const nuevaCategoriaContainer = document.getElementById('nueva-categoria-container');
+    if (nuevaCategoriaContainer) {
+        nuevaCategoriaContainer.style.display = 'none';
+    }
+    
+    // Cargar categorías inmediatamente y también con timeout por si acaso
+    cargarCategoriasGastos();
+    
+    // También intentar después de un pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => {
+        cargarCategoriasGastos();
+        
+        // Si es edición, establecer la categoría después de cargar
+        if (salida) {
+            const select = document.getElementById('salida-descripcion');
+            const descripcion = salida.descripcion || '';
+            if (select && descripcion) {
+                if (select.querySelector(`option[value="${descripcion}"]`)) {
+                    select.value = descripcion;
+                } else if (descripcion) {
+                    // Agregar la categoría si no existe
+                    const option = document.createElement('option');
+                    option.value = descripcion;
+                    option.textContent = descripcion;
+                    select.appendChild(option);
+                    select.value = descripcion;
+                }
+            }
+        }
+    }, 100);
 }
 
 async function handleSalidaSubmit(e) {
@@ -480,21 +933,48 @@ async function handleSalidaSubmit(e) {
         observacion: document.getElementById('salida-observacion').value
     };
     
+    if (!salida.descripcion) {
+        alert('Por favor seleccione o agregue una categoría de gasto');
+        return;
+    }
+    
     try {
+        let response;
         if (id) {
             salida.id = parseInt(id);
-            await fetch('api.php?action=update_salida', {
+            response = await fetch('api.php?action=update_salida', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(salida)
             });
         } else {
-            await fetch('api.php?action=add_salida', {
+            response = await fetch('api.php?action=add_salida', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(salida)
             });
         }
+        
+        const result = await response.json();
+        
+        // Actualizar categorías si vienen en la respuesta
+        if (result.categorias) {
+            allData.categorias_gastos = result.categorias;
+        }
+        
+        // Limpiar formulario completamente
+        const form = document.getElementById('form-salida');
+        form.reset();
+        document.getElementById('salida-id').value = '';
+        document.getElementById('nueva-categoria-container').style.display = 'none';
+        document.getElementById('nueva-categoria-input').value = '';
+        
+        // Establecer valores por defecto
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('salida-tipo').value = 'otro';
+        document.getElementById('salida-fecha').value = hoy;
+        document.getElementById('salida-descripcion').value = '';
+        
         closeModal('modal-salida');
         loadAllData();
     } catch (error) {
@@ -1198,6 +1678,7 @@ function renderMetas() {
                     <span>Restante: ${formatCurrency(restante)}</span>
                 </div>
                 <div class="meta-actions">
+                    <button class="btn btn-secondary" onclick="verDetalleMeta(${meta.id})" style="background: #4a90e2;">Ver Detalle</button>
                     <button class="btn btn-update" onclick="openProgresoMetaModal(${meta.id})">Actualizar Progreso</button>
                     <button class="btn btn-edit" onclick="editMeta(${meta.id})">Editar</button>
                     <button class="btn btn-danger" onclick="deleteMeta(${meta.id})">Eliminar</button>
@@ -1309,6 +1790,124 @@ async function deleteMeta(id) {
     }
 }
 
+function verDetalleMeta(metaId) {
+    const meta = allData.metas.find(m => m.id === metaId);
+    if (!meta) return;
+    
+    const modal = document.getElementById('modal-detalle-meta');
+    document.getElementById('detalle-meta-titulo').textContent = `Detalle: ${meta.descripcion}`;
+    document.getElementById('detalle-meta-nombre').textContent = meta.descripcion;
+    document.getElementById('detalle-meta-objetivo').textContent = formatCurrency(meta.monto_meta);
+    
+    const tbody = document.getElementById('detalle-meta-transacciones');
+    tbody.innerHTML = '';
+    
+    const transacciones = [];
+    let totalAcumulado = 0;
+    
+    // 1. Aportes manuales (monto_actual)
+    if (parseFloat(meta.monto_actual || 0) > 0) {
+        transacciones.push({
+            fecha: '-',
+            fuente: 'Aporte Manual',
+            tipo: 'Manual',
+            monto: parseFloat(meta.monto_actual || 0)
+        });
+        totalAcumulado += parseFloat(meta.monto_actual || 0);
+    }
+    
+    // 2. Aportes de planificación mensual
+    if (allData.planificacion_mensual) {
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        
+        Object.keys(allData.planificacion_mensual).forEach(mes => {
+            const mesData = allData.planificacion_mensual[mes];
+            const personas = ['GABRIELA', 'GREGORIO'];
+            
+            personas.forEach(persona => {
+                if (mesData[persona] && mesData[persona].aportes_metas && mesData[persona].aportes_metas[metaId]) {
+                    const monto = parseFloat(mesData[persona].aportes_metas[metaId] || 0);
+                    if (monto > 0) {
+                        transacciones.push({
+                            fecha: capitalize(mes),
+                            fuente: `Planificación ${capitalize(mes)} - ${persona}`,
+                            tipo: 'Planificado',
+                            monto: monto
+                        });
+                        totalAcumulado += monto;
+                    }
+                }
+            });
+        });
+    }
+    
+    // 3. Aportes de avance real (si existen y tienen aportes_metas)
+    if (allData.avance_real_mensual) {
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        
+        Object.keys(allData.avance_real_mensual).forEach(mes => {
+            const mesData = allData.avance_real_mensual[mes];
+            const personas = ['GABRIELA', 'GREGORIO'];
+            
+            personas.forEach(persona => {
+                if (mesData[persona] && mesData[persona].aportes_metas && mesData[persona].aportes_metas[metaId]) {
+                    const monto = parseFloat(mesData[persona].aportes_metas[metaId] || 0);
+                    if (monto > 0) {
+                        // Verificar si ya existe en planificado para no duplicar
+                        const existeEnPlanificado = transacciones.some(t => 
+                            t.fuente.includes(`Planificación ${capitalize(mes)}`) && 
+                            t.fuente.includes(persona)
+                        );
+                        
+                        if (!existeEnPlanificado) {
+                            transacciones.push({
+                                fecha: capitalize(mes),
+                                fuente: `Avance Real ${capitalize(mes)} - ${persona}`,
+                                tipo: 'Real',
+                                monto: monto
+                            });
+                            // Solo sumar si no existe en planificado
+                            // totalAcumulado += monto;
+                        }
+                    }
+                }
+            });
+        });
+    }
+    
+    // Ordenar transacciones por fecha
+    transacciones.sort((a, b) => {
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        if (a.fecha === '-') return 1;
+        if (b.fecha === '-') return -1;
+        return meses.indexOf(a.fecha) - meses.indexOf(b.fecha);
+    });
+    
+    // Mostrar transacciones
+    if (transacciones.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #7f8c8d; padding: 20px;">No hay transacciones registradas</td></tr>';
+    } else {
+        transacciones.forEach(trans => {
+            const row = `
+                <tr>
+                    <td>${trans.fecha}</td>
+                    <td>${trans.fuente}</td>
+                    <td><span style="padding: 4px 8px; border-radius: 4px; font-size: 0.85em; ${trans.tipo === 'Manual' ? 'background: #4a90e2; color: white;' : trans.tipo === 'Planificado' ? 'background: #f39c12; color: white;' : 'background: #27ae60; color: white;'}">${trans.tipo}</span></td>
+                    <td style="font-weight: 500;">${formatCurrency(trans.monto)}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    
+    document.getElementById('detalle-meta-total').textContent = formatCurrency(totalAcumulado);
+    modal.style.display = 'block';
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 // ========== UTILIDADES ==========
 function showTab(tabName) {
     // Ocultar todos los tabs
@@ -1320,12 +1919,44 @@ function showTab(tabName) {
     });
     
     // Mostrar tab seleccionado
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    event.target.classList.add('active');
+    const tabContent = document.getElementById(`tab-${tabName}`);
+    if (tabContent) {
+        tabContent.classList.add('active');
+    }
+    
+    // Activar botón correspondiente
+    const tabButton = document.querySelector(`[onclick*="showTab('${tabName}')"]`);
+    if (tabButton) {
+        tabButton.classList.add('active');
+    } else if (typeof event !== 'undefined' && event.target) {
+        event.target.classList.add('active');
+    }
+    
+    // Si es el tab de bitácora, asegurar que se renderice
+    if (tabName === 'bitacora') {
+        setTimeout(() => {
+            renderBitacora();
+        }, 50);
+    }
 }
 
 function openModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Si es el modal de salida, usar la función específica que carga categorías
+        if (modalId === 'modal-salida') {
+            openSalidaModal();
+            return;
+        }
+        
+        // Si es el modal de entrada, usar la función específica que carga tipos
+        if (modalId === 'modal-entrada') {
+            openEntradaModal();
+            return;
+        }
+    }
 }
 
 function closeModal(modalId) {
@@ -1342,21 +1973,40 @@ window.onclick = function(event) {
 // ========== BITÁCORA ==========
 function renderBitacora() {
     const container = document.getElementById('bitacora-container');
-    if (!container) return;
+    if (!container) {
+        console.log('bitacora-container no encontrado, la bitácora no está visible');
+        return;
+    }
     
     container.innerHTML = '';
     
     let bitacora = allData.bitacora || [];
+    const totalOriginal = bitacora.length;
+    
+    console.log('renderBitacora - Total original:', totalOriginal);
+    console.log('renderBitacora - Filtro tipo:', bitacoraFiltro);
+    console.log('renderBitacora - Filtro usuario:', bitacoraFiltroUsuario);
     
     // Filtrar si hay filtro activo por tipo
     if (bitacoraFiltro) {
-        bitacora = bitacora.filter(b => b.tipo === bitacoraFiltro);
+        bitacora = bitacora.filter(b => {
+            const match = b.tipo === bitacoraFiltro;
+            return match;
+        });
+        console.log('Después de filtrar por tipo:', bitacora.length);
     }
     
     // Filtrar si hay filtro activo por usuario
     if (bitacoraFiltroUsuario) {
-        bitacora = bitacora.filter(b => (b.usuario || 'Sistema') === bitacoraFiltroUsuario);
+        bitacora = bitacora.filter(b => {
+            const usuarioRegistro = b.usuario || 'Sistema';
+            const match = usuarioRegistro === bitacoraFiltroUsuario;
+            return match;
+        });
+        console.log('Después de filtrar por usuario:', bitacora.length);
     }
+    
+    console.log('Total filtrado:', bitacora.length);
     
     if (bitacora.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No hay registros en la bitácora</p>';
@@ -1473,15 +2123,23 @@ function formatearFecha(fechaStr) {
 }
 
 function filtrarBitacora(tipo, buttonElement = null) {
+    console.log('filtrarBitacora llamado con tipo:', tipo);
     bitacoraFiltro = tipo;
+    console.log('bitacoraFiltro actualizado a:', bitacoraFiltro);
     
-    // Actualizar botones activos de tipo (solo los que no tienen data-filtro="usuario")
-    if (buttonElement) {
-        // Desactivar todos los botones de tipo
-        buttonElement.parentElement.querySelectorAll('.btn:not([data-filtro="usuario"])').forEach(btn => {
+    // Actualizar botones activos de tipo
+    const tipoSection = document.querySelector('.filtro-tipo-section');
+    if (tipoSection) {
+        // Desactivar todos los botones en esa sección
+        tipoSection.querySelectorAll('.btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        // Activar el botón seleccionado
+    } else {
+        console.error('No se encontró .filtro-tipo-section');
+    }
+    
+    // Activar el botón seleccionado
+    if (buttonElement) {
         buttonElement.classList.add('active');
     }
     
@@ -1489,15 +2147,23 @@ function filtrarBitacora(tipo, buttonElement = null) {
 }
 
 function filtrarBitacoraUsuario(usuario, buttonElement = null) {
+    console.log('filtrarBitacoraUsuario llamado con usuario:', usuario);
     bitacoraFiltroUsuario = usuario;
+    console.log('bitacoraFiltroUsuario actualizado a:', bitacoraFiltroUsuario);
     
     // Actualizar botones activos de usuario
-    if (buttonElement) {
-        // Desactivar todos los botones de usuario
-        buttonElement.parentElement.querySelectorAll('.btn[data-filtro="usuario"]').forEach(btn => {
+    const usuarioSection = document.querySelector('.filtro-usuario-section');
+    if (usuarioSection) {
+        // Desactivar todos los botones en esa sección
+        usuarioSection.querySelectorAll('.btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        // Activar el botón seleccionado
+    } else {
+        console.error('No se encontró .filtro-usuario-section');
+    }
+    
+    // Activar el botón seleccionado
+    if (buttonElement) {
         buttonElement.classList.add('active');
     }
     
@@ -1673,12 +2339,26 @@ function renderGraficoAhorros() {
     const ahorrosAcumulados = [];
     let acumulado = 0;
     
-    mesesKeys.forEach(mesKey => {
-        if (allData.planificacion_mensual[mesKey]) {
+    mesesKeys.forEach((mesKey, index) => {
+        // Calcular ahorros de ESTE mes específico
+        let ahorrosMes = 0;
+        
+        // Priorizar avances reales si existen para este mes
+        if (allData.avance_real_mensual && allData.avance_real_mensual[mesKey]) {
+            Object.values(allData.avance_real_mensual[mesKey]).forEach(persona => {
+                ahorrosMes += parseFloat(persona.ahorros || 0);
+            });
+        } 
+        // Si no hay avance real, usar planificación
+        else if (allData.planificacion_mensual && allData.planificacion_mensual[mesKey]) {
             Object.values(allData.planificacion_mensual[mesKey]).forEach(persona => {
-                acumulado += parseFloat(persona.ahorros || 0);
+                ahorrosMes += parseFloat(persona.ahorros || 0);
             });
         }
+        
+        // Acumular progresivamente: sumar los ahorros de este mes al acumulado anterior
+        // El acumulado representa el total de ahorros desde enero hasta este mes
+        acumulado += ahorrosMes;
         ahorrosAcumulados.push(acumulado);
     });
     
@@ -1954,12 +2634,19 @@ function renderEstadoDeudas() {
 window.openDeudaModal = openDeudaModal;
 window.openEntradaModal = openEntradaModal;
 window.openSalidaModal = openSalidaModal;
+window.openEntradaModal = openEntradaModal;
+window.mostrarAgregarTipoIngreso = mostrarAgregarTipoIngreso;
+window.agregarTipoIngreso = agregarTipoIngreso;
+window.cancelarAgregarTipoIngreso = cancelarAgregarTipoIngreso;
 window.openMetaModal = openMetaModal;
 window.openPlanificacionModal = openPlanificacionModal;
 window.openAvanceRealModal = openAvanceRealModal;
 window.registrarPagoDeuda = registrarPagoDeuda;
 window.cambiarMes = cambiarMes;
 window.mostrarSeccionPlanificacion = mostrarSeccionPlanificacion;
+window.mostrarAgregarCategoria = mostrarAgregarCategoria;
+window.agregarCategoria = agregarCategoria;
+window.cancelarAgregarCategoria = cancelarAgregarCategoria;
 window.editDeuda = editDeuda;
 window.deleteDeuda = deleteDeuda;
 window.editEntrada = editEntrada;
@@ -1969,16 +2656,20 @@ window.deleteSalida = deleteSalida;
 window.editMeta = editMeta;
 window.deleteMeta = deleteMeta;
 window.openProgresoMetaModal = openProgresoMetaModal;
+window.verDetalleMeta = verDetalleMeta;
 window.showTab = showTab;
 window.openModal = openModal;
 window.closeModal = closeModal;
-window.filtrarBitacora = function(tipo, buttonElement) {
-    return filtrarBitacora(tipo, buttonElement);
-};
+// Asegurar que las funciones de filtro estén disponibles globalmente ANTES de que se cargue el DOM
+if (typeof window !== 'undefined') {
+    window.filtrarBitacora = function(tipo, buttonElement) {
+        return filtrarBitacora(tipo, buttonElement);
+    };
 
-window.filtrarBitacoraUsuario = function(usuario, buttonElement) {
-    return filtrarBitacoraUsuario(usuario, buttonElement);
-};
+    window.filtrarBitacoraUsuario = function(usuario, buttonElement) {
+        return filtrarBitacoraUsuario(usuario, buttonElement);
+    };
+}
 
 // Renderizar reportes cuando se cambia al tab
 const originalShowTab = window.showTab;
@@ -1986,6 +2677,10 @@ window.showTab = function(tabName) {
     originalShowTab.call(this, tabName);
     if (tabName === 'reportes') {
         renderReportes();
+    } else if (tabName === 'bitacora') {
+        setTimeout(() => {
+            renderBitacora();
+        }, 50);
     }
 };
 

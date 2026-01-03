@@ -38,13 +38,19 @@ require_once 'auth.php';
                     <h3>Total Ingresos</h3>
                     <p class="amount" id="total-ingresos">$0</p>
                 </div>
+                <div class="card recurrent-card">
+                    <h3>💰 Gastos Recurrentes</h3>
+                    <p class="amount" id="gastos-recurrentes">$0</p>
+                    <p class="subtitle-amount">Mensuales Fijos</p>
+                </div>
                 <div class="card expense-card">
-                    <h3>Total Gastos</h3>
-                    <p class="amount" id="total-gastos">$0</p>
+                    <h3>Otros Gastos</h3>
+                    <p class="amount" id="otros-gastos">$0</p>
                 </div>
                 <div class="card debt-card">
                     <h3>Total Deudas</h3>
                     <p class="amount" id="total-deudas">$0</p>
+                    <p class="subtitle-amount">No Fijas</p>
                 </div>
                 <div class="card balance-card">
                     <h3>Balance Disponible</h3>
@@ -76,7 +82,7 @@ require_once 'auth.php';
         <div id="tab-salidas" class="tab-content active">
             <div class="section-header">
                 <h2>💸 Gastos</h2>
-                <button class="btn btn-primary" onclick="openModal('modal-salida')">+ Agregar Gasto</button>
+                <button class="btn btn-primary" onclick="openSalidaModal()">+ Agregar Gasto</button>
             </div>
             
             <!-- Gastos Comunes -->
@@ -166,14 +172,16 @@ require_once 'auth.php';
         <!-- Tab: Entradas -->
         <div id="tab-entradas" class="tab-content">
             <div class="section-header">
-                <h2>💵 Ingresos (Sueldos)</h2>
+                <h2>💵 Ingresos</h2>
                 <button class="btn btn-primary" onclick="openModal('modal-entrada')">+ Agregar Ingreso</button>
             </div>
             <div class="table-container">
                 <table id="table-entradas">
                     <thead>
                         <tr>
-                            <th>Sueldo</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
                             <th>¿Quién?</th>
                             <th>Acciones</th>
                         </tr>
@@ -181,9 +189,9 @@ require_once 'auth.php';
                     <tbody id="tbody-entradas"></tbody>
                     <tfoot>
                         <tr>
-                            <td><strong>TOTAL</strong></td>
+                            <td colspan="2"><strong>TOTAL</strong></td>
                             <td id="entrada-total">$0</td>
-                            <td></td>
+                            <td colspan="2"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -263,7 +271,7 @@ require_once 'auth.php';
             <div class="section-header">
                 <h2>📋 Bitácora de Cambios</h2>
                 <div class="filter-buttons">
-                    <div style="width: 100%; margin-bottom: 10px;">
+                    <div class="filtro-tipo-section" style="width: 100%; margin-bottom: 10px;">
                         <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Tipo:</strong>
                         <button class="btn btn-secondary active" onclick="filtrarBitacora('', this)">Todos</button>
                         <button class="btn btn-secondary" onclick="filtrarBitacora('entrada', this)">Ingresos</button>
@@ -273,7 +281,7 @@ require_once 'auth.php';
                         <button class="btn btn-secondary" onclick="filtrarBitacora('planificacion', this)">Planificación</button>
                         <button class="btn btn-secondary" onclick="filtrarBitacora('avance_real', this)">Avance Real</button>
                     </div>
-                    <div style="width: 100%;">
+                    <div class="filtro-usuario-section" style="width: 100%;">
                         <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Usuario:</strong>
                         <button class="btn btn-secondary active" data-filtro="usuario" onclick="filtrarBitacoraUsuario('', this)">Todos</button>
                         <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('ggPO', this)">ggPO</button>
@@ -439,7 +447,29 @@ require_once 'auth.php';
             <form id="form-entrada">
                 <input type="hidden" id="entrada-id">
                 <div class="form-group">
-                    <label>Sueldo:</label>
+                    <label>Fecha:</label>
+                    <input type="date" id="entrada-fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Ingreso:</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <select id="entrada-tipo" required style="flex: 1;">
+                            <option value="">Seleccione un tipo</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="mostrarAgregarTipoIngreso()" style="white-space: nowrap; padding: 12px 15px;">
+                            + Nueva
+                        </button>
+                    </div>
+                    <div id="nuevo-tipo-ingreso-container" style="display: none; margin-top: 10px;">
+                        <input type="text" id="nuevo-tipo-ingreso-input" placeholder="Ingrese nuevo tipo (ej: SUELDO, HORAS EXTRAS, etc.)" style="width: 100%; padding: 10px; border: 2px solid var(--primary-color); border-radius: 6px;">
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <button type="button" class="btn btn-primary" onclick="agregarTipoIngreso()" style="flex: 1;">Agregar</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelarAgregarTipoIngreso()" style="flex: 1;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Monto:</label>
                     <input type="number" step="0.01" id="entrada-sueldo" required>
                 </div>
                 <div class="form-group">
@@ -469,8 +499,22 @@ require_once 'auth.php';
                     <input type="date" id="salida-fecha" required>
                 </div>
                 <div class="form-group">
-                    <label>Descripción:</label>
-                    <input type="text" id="salida-descripcion" required>
+                    <label>Tipo de Gasto (Categoría):</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <select id="salida-descripcion" required style="flex: 1;">
+                            <option value="">Seleccione una categoría</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="mostrarAgregarCategoria()" style="white-space: nowrap; padding: 12px 15px;">
+                            + Nueva
+                        </button>
+                    </div>
+                    <div id="nueva-categoria-container" style="display: none; margin-top: 10px;">
+                        <input type="text" id="nueva-categoria-input" placeholder="Ingrese nueva categoría (ej: COMIDA, MEDICINA, etc.)" style="width: 100%; padding: 10px; border: 2px solid var(--primary-color); border-radius: 6px;">
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <button type="button" class="btn btn-primary" onclick="agregarCategoria()" style="flex: 1;">Agregar</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelarAgregarCategoria()" style="flex: 1;">Cancelar</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Monto:</label>
@@ -546,6 +590,41 @@ require_once 'auth.php';
                     <button type="button" class="btn btn-secondary" onclick="closeModal('modal-progreso-meta')">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Meta -->
+    <div id="modal-detalle-meta" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" onclick="closeModal('modal-detalle-meta')">&times;</span>
+            <h2 id="detalle-meta-titulo">Detalle de Transacciones</h2>
+            <div style="margin-bottom: 20px;">
+                <strong>Meta:</strong> <span id="detalle-meta-nombre"></span><br>
+                <strong>Monto Objetivo:</strong> <span id="detalle-meta-objetivo"></span>
+            </div>
+            <div class="table-container">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Mes</th>
+                            <th>Fuente</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalle-meta-transacciones">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><strong>Total Acumulado:</strong></td>
+                            <td id="detalle-meta-total" style="font-weight: bold; font-size: 1.1em;"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modal-detalle-meta')">Cerrar</button>
+            </div>
         </div>
     </div>
 

@@ -26,7 +26,9 @@ function readData() {
             'planificacion_mensual' => [],
             'avance_real_mensual' => [],
             'metas' => [],
-            'bitacora' => []
+            'bitacora' => [],
+            'categorias_gastos' => ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'],
+            'tipos_ingresos' => ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS']
         ];
     }
     $content = file_get_contents($dataFile);
@@ -167,16 +169,47 @@ switch ($action) {
         if ($method === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
             $newId = !empty($data['entradas']) ? max(array_column($data['entradas'], 'id')) + 1 : 1;
+            $tipo = strtoupper(trim($input['tipo'] || 'SUELDO'));
+            
+            // Convertir "1" a "SUELDO" (migración)
+            if ($tipo === '1' || $tipo === '') {
+                $tipo = 'SUELDO';
+            }
+            
+            // Inicializar tipos de ingresos si no existen
+            if (!isset($data['tipos_ingresos'])) {
+                $data['tipos_ingresos'] = ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS'];
+            }
+            
+            // Limpiar tipos numéricos de la lista
+            $data['tipos_ingresos'] = array_filter($data['tipos_ingresos'], function($t) {
+                return !preg_match('/^\d+$/', $t);
+            });
+            $data['tipos_ingresos'] = array_values($data['tipos_ingresos']);
+            
+            // Asegurar que SUELDO esté en la lista
+            if (!in_array('SUELDO', $data['tipos_ingresos'])) {
+                $data['tipos_ingresos'][] = 'SUELDO';
+            }
+            
+            // Agregar nuevo tipo si no existe y no es numérico
+            if (!in_array($tipo, $data['tipos_ingresos']) && !preg_match('/^\d+$/', $tipo)) {
+                $data['tipos_ingresos'][] = $tipo;
+                sort($data['tipos_ingresos']);
+            }
+            
             $nuevaEntrada = [
                 'id' => $newId,
                 'sueldo' => floatval($input['sueldo']),
-                'quien' => $input['quien']
+                'quien' => $input['quien'],
+                'tipo' => $tipo,
+                'fecha' => $input['fecha'] ?? date('Y-m-d')
             ];
             $data['entradas'][] = $nuevaEntrada;
             $data = registrarBitacora($data, 'entrada', 'agregar', 
-                "Ingreso: {$input['quien']} - $" . floatval($input['sueldo']), null, json_encode($nuevaEntrada), $newId);
+                "Ingreso ({$tipo}): {$input['quien']} - $" . floatval($input['sueldo']), null, json_encode($nuevaEntrada), $newId);
             saveData($data);
-            echo json_encode(['success' => true, 'data' => $data['entradas']]);
+            echo json_encode(['success' => true, 'data' => $data['entradas'], 'tipos' => $data['tipos_ingresos']]);
         }
         break;
         
@@ -184,21 +217,52 @@ switch ($action) {
         if ($method === 'PUT') {
             $input = json_decode(file_get_contents('php://input'), true);
             $valorAnterior = null;
+            $tipo = strtoupper(trim($input['tipo'] || 'SUELDO'));
+            
+            // Convertir "1" a "SUELDO" (migración)
+            if ($tipo === '1' || $tipo === '') {
+                $tipo = 'SUELDO';
+            }
+            
+            // Inicializar tipos de ingresos si no existen
+            if (!isset($data['tipos_ingresos'])) {
+                $data['tipos_ingresos'] = ['SUELDO', 'HORAS EXTRAS', 'COMISIONES', 'PROYECTOS', 'OTROS'];
+            }
+            
+            // Limpiar tipos numéricos de la lista
+            $data['tipos_ingresos'] = array_filter($data['tipos_ingresos'], function($t) {
+                return !preg_match('/^\d+$/', $t);
+            });
+            $data['tipos_ingresos'] = array_values($data['tipos_ingresos']);
+            
+            // Asegurar que SUELDO esté en la lista
+            if (!in_array('SUELDO', $data['tipos_ingresos'])) {
+                $data['tipos_ingresos'][] = 'SUELDO';
+            }
+            
+            // Agregar nuevo tipo si no existe y no es numérico
+            if (!in_array($tipo, $data['tipos_ingresos']) && !preg_match('/^\d+$/', $tipo)) {
+                $data['tipos_ingresos'][] = $tipo;
+                sort($data['tipos_ingresos']);
+            }
+            
             foreach ($data['entradas'] as &$entrada) {
                 if ($entrada['id'] == $input['id']) {
                     $valorAnterior = json_encode($entrada);
                     $sueldoAnterior = $entrada['sueldo'];
                     $entrada['sueldo'] = floatval($input['sueldo']);
                     $entrada['quien'] = $input['quien'];
+                    $entrada['tipo'] = $tipo;
+                    $entrada['fecha'] = $input['fecha'] ?? ($entrada['fecha'] ?? date('Y-m-d'));
                     $valorNuevo = json_encode($entrada);
                     $data = registrarBitacora($data, 'entrada', 'actualizar', 
-                        "Ingreso: {$input['quien']} - Anterior: $" . $sueldoAnterior . " | Nuevo: $" . floatval($input['sueldo']), 
+                        "Ingreso ({$tipo}): {$input['quien']} - Anterior: $" . $sueldoAnterior . " | Nuevo: $" . floatval($input['sueldo']), 
                         $valorAnterior, $valorNuevo, $input['id']);
                     break;
                 }
             }
             saveData($data);
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'tipos' => $data['tipos_ingresos']]);
         }
         break;
         
@@ -231,9 +295,22 @@ switch ($action) {
             $input = json_decode(file_get_contents('php://input'), true);
             $newId = !empty($data['salidas']) ? max(array_column($data['salidas'], 'id')) + 1 : 1;
             $tipo = $input['tipo'] ?? 'otro';
+            $descripcion = strtoupper(trim($input['descripcion']));
+            
+            // Inicializar categorías si no existen
+            if (!isset($data['categorias_gastos'])) {
+                $data['categorias_gastos'] = ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'];
+            }
+            
+            // Agregar nueva categoría si no existe
+            if (!in_array($descripcion, $data['categorias_gastos'])) {
+                $data['categorias_gastos'][] = $descripcion;
+                sort($data['categorias_gastos']);
+            }
+            
             $nuevaSalida = [
                 'id' => $newId,
-                'descripcion' => $input['descripcion'],
+                'descripcion' => $descripcion,
                 'monto' => floatval($input['monto']),
                 'tipo' => $tipo,
                 'fecha' => $input['fecha'] ?? date('Y-m-d'),
@@ -241,9 +318,9 @@ switch ($action) {
             ];
             $data['salidas'][] = $nuevaSalida;
             $data = registrarBitacora($data, 'salida', 'agregar', 
-                "Gasto ({$tipo}): {$input['descripcion']} - $" . floatval($input['monto']), null, json_encode($nuevaSalida), $newId);
+                "Gasto ({$tipo}): {$descripcion} - $" . floatval($input['monto']), null, json_encode($nuevaSalida), $newId);
             saveData($data);
-            echo json_encode(['success' => true, 'data' => $data['salidas']]);
+            echo json_encode(['success' => true, 'data' => $data['salidas'], 'categorias' => $data['categorias_gastos']]);
         }
         break;
         
@@ -251,24 +328,37 @@ switch ($action) {
         if ($method === 'PUT') {
             $input = json_decode(file_get_contents('php://input'), true);
             $valorAnterior = null;
+            $descripcion = strtoupper(trim($input['descripcion']));
+            
+            // Inicializar categorías si no existen
+            if (!isset($data['categorias_gastos'])) {
+                $data['categorias_gastos'] = ['COMIDA', 'MEDICINA', 'SALIDAS', 'TRANSPORTE', 'ESTUDIOS', 'SERVICIOS', 'VIVIENDA', 'ROPA', 'ENTRETENIMIENTO', 'OTROS'];
+            }
+            
+            // Agregar nueva categoría si no existe
+            if (!in_array($descripcion, $data['categorias_gastos'])) {
+                $data['categorias_gastos'][] = $descripcion;
+                sort($data['categorias_gastos']);
+            }
+            
             foreach ($data['salidas'] as &$salida) {
                 if ($salida['id'] == $input['id']) {
                     $valorAnterior = json_encode($salida);
                     $montoAnterior = $salida['monto'];
-                    $salida['descripcion'] = $input['descripcion'];
+                    $salida['descripcion'] = $descripcion;
                     $salida['monto'] = floatval($input['monto']);
                     $salida['tipo'] = $input['tipo'] ?? ($salida['tipo'] ?? 'otro');
                     $salida['fecha'] = $input['fecha'] ?? ($salida['fecha'] ?? date('Y-m-d'));
                     $salida['observacion'] = $input['observacion'] ?? '';
                     $valorNuevo = json_encode($salida);
                     $data = registrarBitacora($data, 'salida', 'actualizar', 
-                        "Gasto: {$input['descripcion']} - Anterior: $" . $montoAnterior . " | Nuevo: $" . floatval($input['monto']), 
+                        "Gasto: {$descripcion} - Anterior: $" . $montoAnterior . " | Nuevo: $" . floatval($input['monto']), 
                         $valorAnterior, $valorNuevo, $input['id']);
                     break;
                 }
             }
             saveData($data);
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'categorias' => $data['categorias_gastos']]);
         }
         break;
         

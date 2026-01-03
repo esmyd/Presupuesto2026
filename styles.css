@@ -93,6 +93,10 @@ header h1 {
     border-left-color: var(--secondary-color);
 }
 
+.recurrent-card {
+    border-left-color: #e67e22;
+}
+
 .expense-card {
     border-left-color: var(--danger-color);
 }
@@ -125,6 +129,13 @@ header h1 {
     font-size: 2em;
     font-weight: bold;
     color: var(--dark-color);
+}
+
+.card .subtitle-amount {
+    font-size: 0.75em;
+    color: #7f8c8d;
+    margin-top: 5px;
+    font-style: italic;
 }
 
 /* Tabs */
@@ -488,6 +499,8 @@ tfoot td {
     margin-top: 10px;
     font-size: 0.9em;
     color: #7f8c8d;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .meta-actions {
@@ -847,6 +860,26 @@ tfoot td {
     font-weight: 600;
 }
 
+/* Mejoras Tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .summary-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .metas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        width: 85%;
+        max-width: 600px;
+    }
+    
+    .enero-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Mejoras Móviles */
 @media (max-width: 768px) {
     body {
@@ -993,6 +1026,27 @@ tfoot td {
     
     .meta-actions .btn {
         width: 100%;
+        font-size: 0.85em;
+        padding: 10px;
+    }
+    
+    .meta-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .meta-info span {
+        display: block;
+        width: 100%;
+    }
+    
+    .progress-bar-container {
+        height: 20px;
+        margin: 12px 0;
+    }
+    
+    .progress-bar {
+        font-size: 0.75em;
     }
     
     .modal-content {
@@ -1041,7 +1095,20 @@ tfoot td {
     
     .filter-buttons {
         width: 100%;
-        justify-content: center;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filtro-tipo-section,
+    .filtro-usuario-section {
+        width: 100% !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .filter-buttons strong {
+        font-size: 0.9em;
+        margin-bottom: 8px;
+        display: block;
     }
     
     .filter-buttons .btn {
@@ -1049,6 +1116,7 @@ tfoot td {
         min-width: 80px;
         padding: 8px 12px;
         font-size: 0.8em;
+        white-space: nowrap;
     }
     
     .bitacora-container {
@@ -1094,12 +1162,16 @@ tfoot td {
         gap: 15px;
     }
     
+    header > div > div:first-child {
+        width: 100%;
+    }
+    
     header > div > div:last-child {
         width: 100%;
         display: flex;
         flex-direction: column;
         gap: 10px;
-        align-items: flex-start;
+        align-items: stretch;
     }
     
     header > div > div:last-child > a {
@@ -1153,33 +1225,278 @@ tfoot td {
     
     .container {
         padding: 10px;
+        border-radius: 10px;
+    }
+    
+    header {
+        padding-bottom: 15px;
+        margin-bottom: 15px;
     }
     
     header h1 {
-        font-size: 1.3em;
+        font-size: 1.2em;
+        margin-bottom: 5px;
+    }
+    
+    .subtitle {
+        font-size: 0.85em;
     }
     
     .summary-cards {
         grid-template-columns: 1fr;
         gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .card {
+        padding: 12px;
+    }
+    
+    .card h3 {
+        font-size: 0.7em;
+        margin-bottom: 5px;
     }
     
     .card .amount {
-        font-size: 1.3em;
+        font-size: 1.2em;
+    }
+    
+    .tabs {
+        gap: 5px;
+        padding-bottom: 5px;
+    }
+    
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 0.75em;
+        min-width: auto;
+    }
+    
+    .section-header {
+        margin-bottom: 12px;
+    }
+    
+    .section-header h2 {
+        font-size: 1.1em;
+    }
+    
+    .section-header .btn {
+        width: 100%;
+        font-size: 0.85em;
+        padding: 10px;
     }
     
     table {
-        font-size: 0.8em;
-        min-width: 500px;
+        font-size: 0.75em;
+        min-width: 600px;
     }
     
     thead th {
-        padding: 8px 6px;
-        font-size: 0.85em;
+        padding: 8px 5px;
+        font-size: 0.8em;
     }
     
     tbody td {
-        padding: 8px 6px;
+        padding: 8px 5px;
+    }
+    
+    .btn-edit, .btn-danger, .btn-update, .btn-secondary {
+        padding: 5px 8px;
+        font-size: 0.75em;
+        margin: 2px;
+        width: auto;
+    }
+    
+    .meta-card {
+        padding: 12px;
+    }
+    
+    .meta-card h3 {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+    
+    .meta-info {
+        font-size: 0.85em;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .meta-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .meta-actions .btn {
+        width: 100%;
+        font-size: 0.85em;
+        padding: 10px;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 2% auto;
+        padding: 15px;
+        max-height: 95vh;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.1em;
+        margin-bottom: 12px;
+    }
+    
+    .close {
+        right: 10px;
+        top: 10px;
+        font-size: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group label {
+        font-size: 0.85em;
+        margin-bottom: 5px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px;
+        font-size: 0.85em;
+    }
+    
+    .filter-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .filter-buttons > div {
+        width: 100%;
+    }
+    
+    .filter-buttons .btn {
+        flex: 1;
+        min-width: 70px;
+        padding: 6px 10px;
+        font-size: 0.75em;
+    }
+    
+    .bitacora-container {
+        max-height: 50vh;
+        padding: 5px;
+    }
+    
+    .bitacora-item {
+        padding: 10px;
+    }
+    
+    .bitacora-header {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .bitacora-fecha {
+        font-size: 0.75em;
+    }
+    
+    .bitacora-tipo {
+        font-size: 0.65em;
+        padding: 2px 8px;
+    }
+    
+    .bitacora-descripcion {
+        font-size: 0.85em;
+    }
+    
+    .enero-card {
+        padding: 12px;
+    }
+    
+    .enero-item {
+        font-size: 0.85em;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .chart-container {
+        height: 250px;
+        padding: 10px;
+    }
+    
+    .planificacion-tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .plan-tab-button {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .mes-selector {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .mes-selector select {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.9em;
+    }
+    
+    .info-card {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    
+    .gastos-section {
+        margin-bottom: 20px;
+    }
+    
+    .section-subtitle {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+    
+    /* Mejorar área táctil en móviles */
+    .btn, button {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+    
+    /* Evitar zoom en inputs en iOS */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+    }
+    
+    /* Scroll suave */
+    .table-container,
+    .bitacora-container,
+    .modal-content {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Mejorar visualización de tablas en móvil */
+    .table-container {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Ajustar header en móvil */
+    header > div > div:last-child > div:first-child {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+    }
+    
+    header > div > div:last-child > a {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
     }
 }
 
