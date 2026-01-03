@@ -34,10 +34,17 @@ body {
 }
 
 header {
-    text-align: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 3px solid var(--primary-color);
+}
+
+header > div {
+    text-align: center;
+}
+
+header h1 {
+    margin-bottom: 10px;
 }
 
 header h1 {
@@ -1079,6 +1086,25 @@ tfoot td {
     .mes-selector {
         width: 100%;
         margin-top: 10px;
+    }
+    
+    header > div {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+    
+    header > div > div:last-child {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    header > div > div:last-child > a {
+        width: 100%;
+        text-align: center;
     }
     
     .reportes-section {

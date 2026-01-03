@@ -8,6 +8,7 @@ let allData = {
     bitacora: []
 };
 let bitacoraFiltro = '';
+let bitacoraFiltroUsuario = '';
 let mesActual = 'enero';
 
 // Cargar datos al iniciar
@@ -1347,9 +1348,14 @@ function renderBitacora() {
     
     let bitacora = allData.bitacora || [];
     
-    // Filtrar si hay filtro activo
+    // Filtrar si hay filtro activo por tipo
     if (bitacoraFiltro) {
         bitacora = bitacora.filter(b => b.tipo === bitacoraFiltro);
+    }
+    
+    // Filtrar si hay filtro activo por usuario
+    if (bitacoraFiltroUsuario) {
+        bitacora = bitacora.filter(b => (b.usuario || 'Sistema') === bitacoraFiltroUsuario);
     }
     
     if (bitacora.length === 0) {
@@ -1424,11 +1430,15 @@ function renderBitacora() {
             ? `<div class="bitacora-valores">${valorAnteriorHTML}${valorNuevoHTML}</div>` 
             : '';
         
+        const usuario = registro.usuario || 'Sistema';
         item.innerHTML = `
             <div class="bitacora-header">
                 <div>
                     <div class="bitacora-fecha">${formatearFecha(registro.fecha)}</div>
-                    <span class="bitacora-tipo ${registro.tipo}">${registro.tipo}</span>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                        <span class="bitacora-tipo ${registro.tipo}">${registro.tipo}</span>
+                        <span style="background: #4a90e2; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 500;">👤 ${usuario}</span>
+                    </div>
                 </div>
                 <span class="bitacora-accion">${registro.accion.toUpperCase()}</span>
             </div>
@@ -1465,18 +1475,30 @@ function formatearFecha(fechaStr) {
 function filtrarBitacora(tipo, buttonElement = null) {
     bitacoraFiltro = tipo;
     
-    // Actualizar botones activos
-    document.querySelectorAll('.filter-buttons .btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Si se llamó desde un botón, marcarlo como activo
+    // Actualizar botones activos de tipo (solo los que no tienen data-filtro="usuario")
     if (buttonElement) {
+        // Desactivar todos los botones de tipo
+        buttonElement.parentElement.querySelectorAll('.btn:not([data-filtro="usuario"])').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        // Activar el botón seleccionado
         buttonElement.classList.add('active');
-    } else {
-        // Si no hay buttonElement, activar el botón "Todos"
-        const todosBtn = document.querySelector('.filter-buttons .btn');
-        if (todosBtn) todosBtn.classList.add('active');
+    }
+    
+    renderBitacora();
+}
+
+function filtrarBitacoraUsuario(usuario, buttonElement = null) {
+    bitacoraFiltroUsuario = usuario;
+    
+    // Actualizar botones activos de usuario
+    if (buttonElement) {
+        // Desactivar todos los botones de usuario
+        buttonElement.parentElement.querySelectorAll('.btn[data-filtro="usuario"]').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        // Activar el botón seleccionado
+        buttonElement.classList.add('active');
     }
     
     renderBitacora();
@@ -1952,6 +1974,10 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.filtrarBitacora = function(tipo, buttonElement) {
     return filtrarBitacora(tipo, buttonElement);
+};
+
+window.filtrarBitacoraUsuario = function(usuario, buttonElement) {
+    return filtrarBitacoraUsuario(usuario, buttonElement);
 };
 
 // Renderizar reportes cuando se cambia al tab

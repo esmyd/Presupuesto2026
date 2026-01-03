@@ -1,4 +1,13 @@
 <?php
+session_start();
+
+// Verificar autenticación
+if (!isset($_SESSION['usuario_autenticado']) || $_SESSION['usuario_autenticado'] !== true) {
+    http_response_code(401);
+    echo json_encode(['error' => 'No autorizado. Debe iniciar sesión.']);
+    exit;
+}
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
@@ -36,10 +45,14 @@ function registrarBitacora($data, $tipo, $accion, $descripcion, $valorAnterior =
         $data['bitacora'] = [];
     }
     
+    // Obtener usuario de la sesión
+    $usuario = isset($_SESSION['usuario']) ? $_SESSION['usuario'] : 'Sistema';
+    
     $registro = [
         'id' => count($data['bitacora']) + 1,
         'fecha' => date('Y-m-d H:i:s'),
-        'tipo' => $tipo, // 'deuda', 'entrada', 'salida', 'meta', 'enero'
+        'usuario' => $usuario,
+        'tipo' => $tipo, // 'deuda', 'entrada', 'salida', 'meta', 'planificacion', 'avance_real'
         'accion' => $accion, // 'agregar', 'actualizar', 'eliminar'
         'descripcion' => $descripcion,
         'valor_anterior' => $valorAnterior,

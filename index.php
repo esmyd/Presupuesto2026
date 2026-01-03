@@ -1,3 +1,6 @@
+<?php
+require_once 'auth.php';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,8 +13,21 @@
 <body>
     <div class="container">
         <header>
-            <h1>💰 Presupuesto 2026</h1>
-            <p class="subtitle">Gestión de Deudas, Gastos y Metas</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <h1>💰 Presupuesto 2026</h1>
+                    <p class="subtitle">Gestión de Deudas, Gastos y Metas</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: #4a90e2; color: white; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                        <span>👤</span>
+                        <span><?php echo htmlspecialchars($_SESSION['usuario'] ?? 'ggPO'); ?></span>
+                    </div>
+                    <a href="logout.php" style="color: #e74c3c; text-decoration: none; padding: 8px 15px; background: #fff; border-radius: 6px; border: 2px solid #e74c3c; transition: all 0.3s;" onmouseover="this.style.background='#e74c3c'; this.style.color='white';" onmouseout="this.style.background='#fff'; this.style.color='#e74c3c';">
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
         </header>
 
         <!-- Resumen General -->
@@ -247,11 +263,23 @@
             <div class="section-header">
                 <h2>📋 Bitácora de Cambios</h2>
                 <div class="filter-buttons">
-                    <button class="btn btn-secondary active" onclick="filtrarBitacora('', this)">Todos</button>
-                    <button class="btn btn-secondary" onclick="filtrarBitacora('entrada', this)">Ingresos</button>
-                    <button class="btn btn-secondary" onclick="filtrarBitacora('deuda', this)">Deudas</button>
-                    <button class="btn btn-secondary" onclick="filtrarBitacora('salida', this)">Gastos</button>
-                    <button class="btn btn-secondary" onclick="filtrarBitacora('meta', this)">Metas</button>
+                    <div style="width: 100%; margin-bottom: 10px;">
+                        <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Tipo:</strong>
+                        <button class="btn btn-secondary active" onclick="filtrarBitacora('', this)">Todos</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('entrada', this)">Ingresos</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('deuda', this)">Deudas</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('salida', this)">Gastos</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('meta', this)">Metas</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('planificacion', this)">Planificación</button>
+                        <button class="btn btn-secondary" onclick="filtrarBitacora('avance_real', this)">Avance Real</button>
+                    </div>
+                    <div style="width: 100%;">
+                        <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Usuario:</strong>
+                        <button class="btn btn-secondary active" data-filtro="usuario" onclick="filtrarBitacoraUsuario('', this)">Todos</button>
+                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('ggPO', this)">ggPO</button>
+                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('GABRIELA', this)">GABRIELA</button>
+                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('GREGORIO', this)">GREGORIO</button>
+                    </div>
                 </div>
             </div>
             <div class="bitacora-container" id="bitacora-container"></div>
