@@ -271,22 +271,26 @@ require_once 'auth.php';
             <div class="section-header">
                 <h2>📋 Bitácora de Cambios</h2>
                 <div class="filter-buttons">
-                    <div class="filtro-tipo-section" style="width: 100%; margin-bottom: 10px;">
-                        <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Tipo:</strong>
-                        <button class="btn btn-secondary active" onclick="filtrarBitacora('', this)">Todos</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('entrada', this)">Ingresos</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('deuda', this)">Deudas</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('salida', this)">Gastos</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('meta', this)">Metas</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('planificacion', this)">Planificación</button>
-                        <button class="btn btn-secondary" onclick="filtrarBitacora('avance_real', this)">Avance Real</button>
+                    <div class="filtro-tipo-section" style="width: 100%; margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 10px; color: var(--dark-color); font-size: 0.95em;">📋 Filtrar por Tipo:</strong>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary bitacora-filtro-tipo active" data-tipo="">Todos</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="entrada">Ingresos</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="deuda">Deudas</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="salida">Gastos</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="meta">Metas</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="planificacion">Planificación</button>
+                            <button class="btn btn-secondary bitacora-filtro-tipo" data-tipo="avance_real">Avance Real</button>
+                        </div>
                     </div>
                     <div class="filtro-usuario-section" style="width: 100%;">
-                        <strong style="display: block; margin-bottom: 8px; color: var(--dark-color);">Filtrar por Usuario:</strong>
-                        <button class="btn btn-secondary active" data-filtro="usuario" onclick="filtrarBitacoraUsuario('', this)">Todos</button>
-                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('ggPO', this)">ggPO</button>
-                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('GABRIELA', this)">GABRIELA</button>
-                        <button class="btn btn-secondary" data-filtro="usuario" onclick="filtrarBitacoraUsuario('GREGORIO', this)">GREGORIO</button>
+                        <strong style="display: block; margin-bottom: 10px; color: var(--dark-color); font-size: 0.95em;">👤 Filtrar por Usuario:</strong>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary bitacora-filtro-usuario active" data-usuario="">Todos</button>
+                            <button class="btn btn-secondary bitacora-filtro-usuario" data-usuario="ggPO">ggPO</button>
+                            <button class="btn btn-secondary bitacora-filtro-usuario" data-usuario="GABRIELA">GABRIELA</button>
+                            <button class="btn btn-secondary bitacora-filtro-usuario" data-usuario="GREGORIO">GREGORIO</button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -36,6 +36,11 @@ function setupEventListeners() {
     if (formAvanceReal) {
         formAvanceReal.addEventListener('submit', handleAvanceRealSubmit);
     }
+    
+    // Configurar filtros de bitácora después de un pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => {
+        setupBitacoraFilters();
+    }, 300);
 }
 
 // Cargar todos los datos
@@ -2122,50 +2127,89 @@ function formatearFecha(fechaStr) {
     });
 }
 
+// Configurar event listeners para filtros de bitácora usando delegación de eventos
+function setupBitacoraFilters() {
+    // Usar delegación de eventos en document para que funcione incluso si los elementos no existen aún
+    // Remover listeners anteriores si existen
+    if (window.bitacoraFilterHandlerTipo) {
+        document.removeEventListener('click', window.bitacoraFilterHandlerTipo);
+    }
+    if (window.bitacoraFilterHandlerUsuario) {
+        document.removeEventListener('click', window.bitacoraFilterHandlerUsuario);
+    }
+    
+    // Handler para filtros de tipo
+    window.bitacoraFilterHandlerTipo = function(e) {
+        const button = e.target.closest('.bitacora-filtro-tipo');
+        if (button) {
+            e.preventDefault();
+            const tipo = button.getAttribute('data-tipo') || '';
+            
+            // Desactivar todos los botones de tipo
+            document.querySelectorAll('.bitacora-filtro-tipo').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activar el botón seleccionado
+            button.classList.add('active');
+            
+            // Actualizar filtro y renderizar
+            bitacoraFiltro = tipo;
+            renderBitacora();
+        }
+    };
+    
+    // Handler para filtros de usuario
+    window.bitacoraFilterHandlerUsuario = function(e) {
+        const button = e.target.closest('.bitacora-filtro-usuario');
+        if (button) {
+            e.preventDefault();
+            const usuario = button.getAttribute('data-usuario') || '';
+            
+            // Desactivar todos los botones de usuario
+            document.querySelectorAll('.bitacora-filtro-usuario').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activar el botón seleccionado
+            button.classList.add('active');
+            
+            // Actualizar filtro y renderizar
+            bitacoraFiltroUsuario = usuario;
+            renderBitacora();
+        }
+    };
+    
+    // Añadir listeners al document
+    document.addEventListener('click', window.bitacoraFilterHandlerTipo);
+    document.addEventListener('click', window.bitacoraFilterHandlerUsuario);
+}
+
+// Función de compatibilidad para onclick (por si acaso)
 function filtrarBitacora(tipo, buttonElement = null) {
-    console.log('filtrarBitacora llamado con tipo:', tipo);
-    bitacoraFiltro = tipo;
-    console.log('bitacoraFiltro actualizado a:', bitacoraFiltro);
+    bitacoraFiltro = tipo || '';
     
     // Actualizar botones activos de tipo
-    const tipoSection = document.querySelector('.filtro-tipo-section');
-    if (tipoSection) {
-        // Desactivar todos los botones en esa sección
-        tipoSection.querySelectorAll('.btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-    } else {
-        console.error('No se encontró .filtro-tipo-section');
-    }
-    
-    // Activar el botón seleccionado
-    if (buttonElement) {
-        buttonElement.classList.add('active');
-    }
+    document.querySelectorAll('.bitacora-filtro-tipo').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tipo') === tipo) {
+            btn.classList.add('active');
+        }
+    });
     
     renderBitacora();
 }
 
 function filtrarBitacoraUsuario(usuario, buttonElement = null) {
-    console.log('filtrarBitacoraUsuario llamado con usuario:', usuario);
-    bitacoraFiltroUsuario = usuario;
-    console.log('bitacoraFiltroUsuario actualizado a:', bitacoraFiltroUsuario);
+    bitacoraFiltroUsuario = usuario || '';
     
     // Actualizar botones activos de usuario
-    const usuarioSection = document.querySelector('.filtro-usuario-section');
-    if (usuarioSection) {
-        // Desactivar todos los botones en esa sección
-        usuarioSection.querySelectorAll('.btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-    } else {
-        console.error('No se encontró .filtro-usuario-section');
-    }
-    
-    // Activar el botón seleccionado
-    if (buttonElement) {
-        buttonElement.classList.add('active');
-    }
+    document.querySelectorAll('.bitacora-filtro-usuario').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-usuario') === usuario) {
+            btn.classList.add('active');
+        }
+    });
     
     renderBitacora();
 }
@@ -2680,7 +2724,9 @@ window.showTab = function(tabName) {
     } else if (tabName === 'bitacora') {
         setTimeout(() => {
             renderBitacora();
-        }, 50);
+            // Reconfigurar filtros cuando se muestra el tab de bitácora
+            setupBitacoraFilters();
+        }, 100);
     }
 };
 
