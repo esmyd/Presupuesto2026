@@ -1,0 +1,736 @@
+{
+    "deudas": [
+        {
+            "id": 1,
+            "descripcion": "DEPRATI",
+            "monto": 80,
+            "quien": "GABRIELA",
+            "enero": 30,
+            "montos_mensuales": {
+                "marzo": 50,
+                "enero": 30
+            },
+            "montos_pagados": {
+                "enero": 50
+            },
+            "montos_comprometidos": {
+                "enero": 76.98
+            }
+        },
+        {
+            "id": 2,
+            "descripcion": "ETA",
+            "monto": 210,
+            "quien": "GABRIELA",
+            "enero": 30,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 202.07
+            }
+        },
+        {
+            "id": 3,
+            "descripcion": "ROLAN",
+            "monto": 50,
+            "quien": "GABRIELA",
+            "enero": 38,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 48.11
+            }
+        },
+        {
+            "id": 4,
+            "descripcion": "TIA GABRIELA",
+            "monto": 25,
+            "quien": "GABRIELA",
+            "enero": 25,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 24.06
+            }
+        },
+        {
+            "id": 5,
+            "descripcion": "CELULAR",
+            "monto": 85,
+            "quien": "GABRIELA",
+            "enero": 50,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 81.79
+            }
+        },
+        {
+            "id": 6,
+            "descripcion": "ETA",
+            "monto": 90,
+            "quien": "GREGORIO",
+            "enero": 0,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 125.9
+            }
+        },
+        {
+            "id": 7,
+            "descripcion": "TARJETA TC",
+            "monto": 430,
+            "quien": "GREGORIO",
+            "enero": 350,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_comprometidos": {
+                "enero": 601.52
+            }
+        },
+        {
+            "id": 8,
+            "descripcion": "TIA Gabriela",
+            "monto": 14,
+            "quien": "GREGORIO",
+            "enero": 14,
+            "montos_pagados": {
+                "enero": 0
+            },
+            "montos_mensuales": {
+                "enero": 14
+            },
+            "montos_comprometidos": {
+                "enero": 19.58
+            }
+        }
+    ],
+    "entradas": [
+        {
+            "id": 1,
+            "sueldo": 540,
+            "quien": "GABRIELA"
+        },
+        {
+            "id": 2,
+            "sueldo": 1250,
+            "quien": "GREGORIO"
+        }
+    ],
+    "salidas": [
+        {
+            "id": 1,
+            "descripcion": "ALQUILER",
+            "monto": 270,
+            "tipo": "comun",
+            "fecha": "2026-01-01",
+            "observacion": "PAGO DE ALQUILER"
+        },
+        {
+            "id": 2,
+            "descripcion": "LUZ",
+            "monto": 20,
+            "tipo": "comun",
+            "fecha": "2026-01-01",
+            "observacion": "PAGO DE SERVICIOS"
+        },
+        {
+            "id": 3,
+            "descripcion": "SALIDAS",
+            "monto": 10,
+            "tipo": "comun",
+            "fecha": "2026-01-01",
+            "observacion": "HELADOS"
+        }
+    ],
+    "bitacora": [
+        {
+            "id": 47,
+            "fecha": "2026-01-02 20:42:29",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Progreso Meta: CAMA - Anterior: $0 | Nuevo: $0",
+            "valor_anterior": "{\"monto_actual\":0}",
+            "valor_nuevo": "{\"monto_actual\":0}",
+            "id_item": 1
+        },
+        {
+            "id": 46,
+            "fecha": "2026-01-02 20:42:25",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Meta: CAMA",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":0}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":0}",
+            "id_item": 1
+        },
+        {
+            "id": 45,
+            "fecha": "2026-01-02 20:41:30",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Meta: CAMA",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":300}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":0}",
+            "id_item": 1
+        },
+        {
+            "id": 44,
+            "fecha": "2026-01-02 20:41:20",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Enero: GREGORIO",
+            "valor_anterior": "{\"monto_casa_deudas\":747.01,\"mama\":80,\"hijos\":150,\"ahorros\":200,\"aportes_metas\":[]}",
+            "valor_nuevo": "{\"monto_casa_deudas\":747.01,\"mama\":80,\"hijos\":150,\"ahorros\":200,\"aportes_metas\":[]}",
+            "id_item": null
+        },
+        {
+            "id": 43,
+            "fecha": "2026-01-02 20:41:17",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Enero: GABRIELA",
+            "valor_anterior": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":0,\"aportes_metas\":{\"1\":100}}",
+            "valor_nuevo": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":0,\"aportes_metas\":[]}",
+            "id_item": null
+        },
+        {
+            "id": 42,
+            "fecha": "2026-01-01 15:45:56",
+            "tipo": "salida",
+            "accion": "actualizar",
+            "descripcion": "Gasto: SALIDAS - Anterior: $20 | Nuevo: $10",
+            "valor_anterior": "{\"id\":3,\"descripcion\":\"COMIDA\",\"monto\":20,\"tipo\":\"comun\",\"fecha\":\"2026-01-01\",\"observacion\":\"GASTO DE LA FIETAS\"}",
+            "valor_nuevo": "{\"id\":3,\"descripcion\":\"SALIDAS\",\"monto\":10,\"tipo\":\"comun\",\"fecha\":\"2026-01-01\",\"observacion\":\"HELADOS\"}",
+            "id_item": 3
+        },
+        {
+            "id": 41,
+            "fecha": "2026-01-01 15:45:18",
+            "tipo": "salida",
+            "accion": "agregar",
+            "descripcion": "Gasto (comun): COMIDA - $20",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"id\":3,\"descripcion\":\"COMIDA\",\"monto\":20,\"tipo\":\"comun\",\"fecha\":\"2026-01-01\",\"observacion\":\"GASTO DE LA FIETAS\"}",
+            "id_item": 3
+        },
+        {
+            "id": 40,
+            "fecha": "2026-01-01 15:43:08",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Meta: CAMA",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":300}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"CAMA\",\"monto_meta\":300,\"monto_actual\":300}",
+            "id_item": 1
+        },
+        {
+            "id": 39,
+            "fecha": "2026-01-01 15:43:04",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Progreso Meta: CAMA - Anterior: $100 | Nuevo: $300",
+            "valor_anterior": "{\"monto_actual\":100}",
+            "valor_nuevo": "{\"monto_actual\":300}",
+            "id_item": 1
+        },
+        {
+            "id": 38,
+            "fecha": "2026-01-01 15:42:56",
+            "tipo": "meta",
+            "accion": "actualizar",
+            "descripcion": "Progreso Meta: CAMA - Anterior: $50 | Nuevo: $100",
+            "valor_anterior": "{\"monto_actual\":50}",
+            "valor_nuevo": "{\"monto_actual\":100}",
+            "id_item": 1
+        },
+        {
+            "id": 37,
+            "fecha": "2026-01-01 15:42:12",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Enero: GABRIELA",
+            "valor_anterior": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":100,\"aportes_metas\":{\"1\":100}}",
+            "valor_nuevo": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":0,\"aportes_metas\":{\"1\":100}}",
+            "id_item": null
+        },
+        {
+            "id": 36,
+            "fecha": "2026-01-01 15:42:06",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Enero: GABRIELA",
+            "valor_anterior": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":100,\"aportes_metas\":[]}",
+            "valor_nuevo": "{\"monto_casa_deudas\":433,\"mama\":30,\"hijos\":20,\"ahorros\":100,\"aportes_metas\":{\"1\":100}}",
+            "id_item": null
+        },
+        {
+            "id": 35,
+            "fecha": "2026-01-01 15:40:45",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Deuda: DEPRATI",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"DEPRATI\",\"monto\":0,\"quien\":\"GABRIELA\",\"enero\":30,\"montos_mensuales\":{\"marzo\":50,\"enero\":30},\"montos_pagados\":{\"enero\":50}}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"DEPRATI\",\"monto\":80,\"quien\":\"GABRIELA\",\"enero\":30,\"montos_mensuales\":{\"marzo\":50,\"enero\":30},\"montos_pagados\":{\"enero\":50}}",
+            "id_item": 1
+        },
+        {
+            "id": 34,
+            "fecha": "2026-01-01 15:40:15",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Deuda: DEPRATI",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"DEPRATI\",\"monto\":80,\"quien\":\"GABRIELA\",\"enero\":30,\"montos_mensuales\":{\"marzo\":50},\"montos_pagados\":{\"enero\":50}}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"DEPRATI\",\"monto\":0,\"quien\":\"GABRIELA\",\"enero\":30,\"montos_mensuales\":{\"marzo\":50,\"enero\":30},\"montos_pagados\":{\"enero\":50}}",
+            "id_item": 1
+        },
+        {
+            "id": 33,
+            "fecha": "2026-01-01 15:39:46",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda DEPRATI - Enero: Comprometido $0 | Pagado $50",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":30}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":50}",
+            "id_item": 1
+        },
+        {
+            "id": 32,
+            "fecha": "2026-01-01 15:39:30",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda DEPRATI - Enero: Comprometido $0 | Pagado $30",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":30}",
+            "id_item": 1
+        },
+        {
+            "id": 31,
+            "fecha": "2026-01-01 15:38:01",
+            "tipo": "entrada",
+            "accion": "actualizar",
+            "descripcion": "Ingreso: GABRIELA - Anterior: $600 | Nuevo: $540",
+            "valor_anterior": "{\"id\":1,\"sueldo\":600,\"quien\":\"GABRIELA\"}",
+            "valor_nuevo": "{\"id\":1,\"sueldo\":540,\"quien\":\"GABRIELA\"}",
+            "id_item": 1
+        },
+        {
+            "id": 30,
+            "fecha": "2026-01-01 15:16:48",
+            "tipo": "salida",
+            "accion": "actualizar",
+            "descripcion": "Gasto: LUZ - Anterior: $20 | Nuevo: $20",
+            "valor_anterior": "{\"id\":2,\"descripcion\":\"LUZ\",\"monto\":20,\"tipo\":\"comun\"}",
+            "valor_nuevo": "{\"id\":2,\"descripcion\":\"LUZ\",\"monto\":20,\"tipo\":\"comun\",\"fecha\":\"2026-01-01\",\"observacion\":\"PAGO DE SERVICIOS\"}",
+            "id_item": 2
+        },
+        {
+            "id": 29,
+            "fecha": "2026-01-01 15:16:37",
+            "tipo": "salida",
+            "accion": "actualizar",
+            "descripcion": "Gasto: ALQUILER - Anterior: $270 | Nuevo: $270",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"ALQUILER\",\"monto\":270,\"tipo\":\"comun\"}",
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"ALQUILER\",\"monto\":270,\"tipo\":\"comun\",\"fecha\":\"2026-01-01\",\"observacion\":\"PAGO DE ALQUILER\"}",
+            "id_item": 1
+        },
+        {
+            "id": 28,
+            "fecha": "2026-01-01 15:11:39",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Deuda: TIA Gabriela",
+            "valor_anterior": "{\"id\":8,\"descripcion\":\"TIA\",\"monto\":14,\"quien\":\"GREGORIO\",\"enero\":14,\"montos_pagados\":{\"enero\":0}}",
+            "valor_nuevo": "{\"id\":8,\"descripcion\":\"TIA Gabriela\",\"monto\":14,\"quien\":\"GREGORIO\",\"enero\":14,\"montos_pagados\":{\"enero\":0},\"montos_mensuales\":{\"enero\":14}}",
+            "id_item": 8
+        },
+        {
+            "id": 27,
+            "fecha": "2026-01-01 14:59:49",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda DEPRATI - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":30}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 1
+        },
+        {
+            "id": 26,
+            "fecha": "2026-01-01 14:59:36",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda DEPRATI - Enero: Comprometido $0 | Pagado $30",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":30}",
+            "id_item": 1
+        },
+        {
+            "id": 25,
+            "fecha": "2026-01-01 14:58:06",
+            "tipo": "salida",
+            "accion": "agregar",
+            "descripcion": "Gasto (comun): LUZ - $20",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"id\":2,\"descripcion\":\"LUZ\",\"monto\":20,\"tipo\":\"comun\"}",
+            "id_item": 2
+        },
+        {
+            "id": 24,
+            "fecha": "2026-01-01 14:55:51",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda TIA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 8
+        },
+        {
+            "id": 23,
+            "fecha": "2026-01-01 14:55:37",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ETA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 6
+        },
+        {
+            "id": 22,
+            "fecha": "2026-01-01 14:55:36",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda TARJETA TC - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 7
+        },
+        {
+            "id": 21,
+            "fecha": "2026-01-01 14:55:34",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ETA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 6
+        },
+        {
+            "id": 20,
+            "fecha": "2026-01-01 14:55:32",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ETA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 6
+        },
+        {
+            "id": 19,
+            "fecha": "2026-01-01 14:55:30",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ETA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 6
+        },
+        {
+            "id": 18,
+            "fecha": "2026-01-01 14:55:28",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda CELULAR - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 5
+        },
+        {
+            "id": 17,
+            "fecha": "2026-01-01 14:55:27",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda TIA GABRIELA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 4
+        },
+        {
+            "id": 16,
+            "fecha": "2026-01-01 14:55:21",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ROLAN - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 3
+        },
+        {
+            "id": 15,
+            "fecha": "2026-01-01 14:55:19",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda ETA - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 2
+        },
+        {
+            "id": 14,
+            "fecha": "2026-01-01 14:55:15",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Pago Real Deuda DEPRATI - Enero: Comprometido $0 | Pagado $0",
+            "valor_anterior": "{\"mes\":\"enero\",\"pagado\":0}",
+            "valor_nuevo": "{\"mes\":\"enero\",\"pagado\":0}",
+            "id_item": 1
+        },
+        {
+            "id": 13,
+            "fecha": "2026-01-01 14:49:24",
+            "tipo": "salida",
+            "accion": "agregar",
+            "descripcion": "Gasto (comun): ALQUILER - $270",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"id\":1,\"descripcion\":\"ALQUILER\",\"monto\":270,\"tipo\":\"comun\"}",
+            "id_item": 1
+        },
+        {
+            "id": 12,
+            "fecha": "2026-01-01 14:45:01",
+            "tipo": "salida",
+            "accion": "eliminar",
+            "descripcion": "Gasto: SALIDA - $50",
+            "valor_anterior": "{\"id\":5,\"descripcion\":\"SALIDA\",\"monto\":50,\"tipo\":\"comun\"}",
+            "valor_nuevo": null,
+            "id_item": 5
+        },
+        {
+            "id": 11,
+            "fecha": "2026-01-01 14:44:58",
+            "tipo": "salida",
+            "accion": "eliminar",
+            "descripcion": "Gasto: COMIDA - $200",
+            "valor_anterior": "{\"id\":4,\"descripcion\":\"COMIDA\",\"monto\":200,\"tipo\":\"comun\"}",
+            "valor_nuevo": null,
+            "id_item": 4
+        },
+        {
+            "id": 10,
+            "fecha": "2026-01-01 14:44:56",
+            "tipo": "salida",
+            "accion": "eliminar",
+            "descripcion": "Gasto: TRANSPORTE - $36",
+            "valor_anterior": "{\"id\":3,\"descripcion\":\"TRANSPORTE\",\"monto\":36,\"tipo\":\"comun\"}",
+            "valor_nuevo": null,
+            "id_item": 3
+        },
+        {
+            "id": 9,
+            "fecha": "2026-01-01 14:44:54",
+            "tipo": "salida",
+            "accion": "eliminar",
+            "descripcion": "Gasto: SERVICIOS - $75",
+            "valor_anterior": "{\"id\":2,\"descripcion\":\"SERVICIOS\",\"monto\":75,\"tipo\":\"comun\"}",
+            "valor_nuevo": null,
+            "id_item": 2
+        },
+        {
+            "id": 8,
+            "fecha": "2026-01-01 14:44:53",
+            "tipo": "salida",
+            "accion": "eliminar",
+            "descripcion": "Gasto: CASA - $270",
+            "valor_anterior": "{\"id\":1,\"descripcion\":\"CASA\",\"monto\":270,\"tipo\":\"comun\"}",
+            "valor_nuevo": null,
+            "id_item": 1
+        },
+        {
+            "id": 7,
+            "fecha": "2026-01-01 14:35:20",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Marzo: GABRIELA",
+            "valor_anterior": "{\"monto_casa_deudas\":50,\"mama\":50,\"hijos\":0,\"ahorros\":0,\"aportes_metas\":[]}",
+            "valor_nuevo": "{\"monto_casa_deudas\":0,\"mama\":0,\"hijos\":0,\"ahorros\":0,\"aportes_metas\":[]}",
+            "id_item": null
+        },
+        {
+            "id": 6,
+            "fecha": "2026-01-01 14:27:48",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Marzo: GREGORIO",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"monto_casa_deudas\":0,\"mama\":0,\"hijos\":0,\"ahorros\":0,\"aportes_metas\":{\"1\":50}}",
+            "id_item": null
+        },
+        {
+            "id": 5,
+            "fecha": "2026-01-01 14:27:14",
+            "tipo": "planificacion",
+            "accion": "actualizar",
+            "descripcion": "Planificación Marzo: GABRIELA",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"monto_casa_deudas\":50,\"mama\":50,\"hijos\":0,\"ahorros\":0,\"aportes_metas\":[]}",
+            "id_item": null
+        },
+        {
+            "id": 4,
+            "fecha": "2026-01-01 14:24:53",
+            "tipo": "salida",
+            "accion": "actualizar",
+            "descripcion": "Gasto: SALIDA - Anterior: $50 | Nuevo: $50",
+            "valor_anterior": "{\"id\":5,\"descripcion\":\"SALIDA\",\"monto\":50,\"tipo\":\"otro\"}",
+            "valor_nuevo": "{\"id\":5,\"descripcion\":\"SALIDA\",\"monto\":50,\"tipo\":\"comun\"}",
+            "id_item": 5
+        },
+        {
+            "id": 3,
+            "fecha": "2026-01-01 14:21:49",
+            "tipo": "entrada",
+            "accion": "eliminar",
+            "descripcion": "Ingreso: GREGORIO - $1500",
+            "valor_anterior": "{\"id\":3,\"sueldo\":1500,\"quien\":\"GREGORIO\"}",
+            "valor_nuevo": null,
+            "id_item": 3
+        },
+        {
+            "id": 2,
+            "fecha": "2026-01-01 14:21:17",
+            "tipo": "entrada",
+            "accion": "agregar",
+            "descripcion": "Ingreso: GREGORIO - $1500",
+            "valor_anterior": null,
+            "valor_nuevo": "{\"id\":3,\"sueldo\":1500,\"quien\":\"GREGORIO\"}",
+            "id_item": 3
+        },
+        {
+            "id": 1,
+            "fecha": "2026-01-01 14:18:21",
+            "tipo": "deuda",
+            "accion": "actualizar",
+            "descripcion": "Deuda DEPRATI - Marzo: Anterior $0 | Nuevo $50",
+            "valor_anterior": "{\"mes\":\"marzo\",\"monto\":0}",
+            "valor_nuevo": "{\"mes\":\"marzo\",\"monto\":50}",
+            "id_item": 1
+        }
+    ],
+    "planificacion_mensual": {
+        "enero": {
+            "GABRIELA": {
+                "monto_casa_deudas": 433,
+                "mama": 30,
+                "hijos": 20,
+                "ahorros": 0,
+                "aportes_metas": []
+            },
+            "GREGORIO": {
+                "monto_casa_deudas": 747.01,
+                "mama": 80,
+                "hijos": 150,
+                "ahorros": 200,
+                "aportes_metas": []
+            }
+        },
+        "marzo": {
+            "GABRIELA": {
+                "monto_casa_deudas": 0,
+                "mama": 0,
+                "hijos": 0,
+                "ahorros": 0,
+                "aportes_metas": []
+            },
+            "GREGORIO": {
+                "monto_casa_deudas": 0,
+                "mama": 0,
+                "hijos": 0,
+                "ahorros": 0,
+                "aportes_metas": {
+                    "1": 50
+                }
+            }
+        }
+    },
+    "avance_real_mensual": [],
+    "metas": [
+        {
+            "id": 1,
+            "descripcion": "CAMA",
+            "monto_meta": 300,
+            "monto_actual": 0
+        },
+        {
+            "id": 2,
+            "descripcion": "MOTO",
+            "monto_meta": 3200,
+            "monto_actual": 0
+        },
+        {
+            "id": 3,
+            "descripcion": "NEVERA",
+            "monto_meta": 650,
+            "monto_actual": 0
+        },
+        {
+            "id": 4,
+            "descripcion": "COCINA",
+            "monto_meta": 400,
+            "monto_actual": 0
+        },
+        {
+            "id": 5,
+            "descripcion": "MUEBLES",
+            "monto_meta": 500,
+            "monto_actual": 0
+        },
+        {
+            "id": 6,
+            "descripcion": "COMEDOR",
+            "monto_meta": 150,
+            "monto_actual": 0
+        },
+        {
+            "id": 7,
+            "descripcion": "LAVADORA",
+            "monto_meta": 650,
+            "monto_actual": 0
+        },
+        {
+            "id": 8,
+            "descripcion": "VIAJE (MARZO)",
+            "monto_meta": 1200,
+            "monto_actual": 0
+        },
+        {
+            "id": 9,
+            "descripcion": "CASA",
+            "monto_meta": 6000,
+            "monto_actual": 0
+        },
+        {
+            "id": 10,
+            "descripcion": "VIAJE (AGOSTO)",
+            "monto_meta": 3000,
+            "monto_actual": 0
+        },
+        {
+            "id": 11,
+            "descripcion": "CUMPLEAÑO GORDA",
+            "monto_meta": 2000,
+            "monto_actual": 0
+        },
+        {
+            "id": 12,
+            "descripcion": "DIENTES DE GABRIELA",
+            "monto_meta": 50,
+            "monto_actual": 0
+        }
+    ]
+}
